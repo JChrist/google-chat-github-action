@@ -4,15 +4,19 @@ author: 'Your name or organization here'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  name:
+    description: 'Job Name'
     required: true
-    default: '1000'
+  url:
+    description: 'Google Chat Webhook URL'
+    required: true
+  status:
+    description: 'Job Status'
+    required: true
 
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+branding:
+  icon: 'bell'
+  color: 'green'
 
 runs:
   using: node20
