@@ -32417,6 +32417,12 @@ const colors = {
   other: '#ffc107'
 };
 
+const events = {
+  pull_request: 'pull_request',
+  push: 'push',
+  workflow_dispatch: 'workflow_dispatch'
+};
+
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -32442,25 +32448,10 @@ async function run() {
 
 async function sendNotification(name, url, status) {
   const { owner, repo } = github.context.repo;
-  const { eventName, sha, ref } = github.context;
+  const { eventName, sha, ref, actor, workflow } = github.context;
   const { number } = github.context.issue;
-  const repoUrl = `https://github.com/${owner}/${repo}`;
-  const eventPath = eventName === 'pull_request' ? `/pull/${number}` : `/commit/${sha}`;
-  const eventUrl = `${repoUrl}${eventPath}`;
-  const checksUrl = `${repoUrl}${eventPath}/checks`;
 
-  const statusLower = status.toLowerCase();
-  let statusColor;
-  if (statusLower === 'success') {
-    statusColor = colors.success;
-  } else if (statusLower === 'failure') {
-    statusColor = colors.failure;
-  } else {
-    // if (statusLower === 'cancelled') {
-    statusColor = colors.other;
-  }
-
-  const card = createCard({ name, status, statusColor, owner, repo, eventName, ref, checksUrl, repoUrl, eventUrl });
+  const card = createCard({ name, status, owner, repo, eventName, ref, actor, workflow, sha, number });
   const body = createBody(name, card);
 
   try {
@@ -32473,42 +32464,121 @@ async function sendNotification(name, url, status) {
   }
 }
 
-function createCard({ name, status, statusColor, owner, repo, eventName, ref, checksUrl, repoUrl, eventUrl }) {
+function createCard({ name, status, owner, repo, eventName, ref, actor, workflow, sha, number }) {
+  const statusLower = status.toLowerCase();
+  let statusColor;
+  const statusName = status.substring(0, 1).toUpperCase() + status.substring(1);
+  let statusType = statusLower;
+  if (statusLower === 'success') {
+    statusColor = colors.success;
+  } else if (statusLower === 'failure') {
+    statusColor = colors.failure;
+  } else {
+    // if (statusLower === 'cancelled') {
+    statusColor = colors.other;
+    statusType = 'cancelled';
+  }
+
+  const eventType = events[(eventName || '').toLowerCase()] || events.push;
+  let eventNameFmt;
+  if (eventType === events.pull_request) {
+    eventNameFmt = 'Pull Request';
+  } else if (eventType === events.push) {
+    eventNameFmt = 'Push';
+  } else {
+    eventNameFmt = 'Workflow Dispatch';
+  }
+
+  const eventPath = eventType === events.pull_request ? `/pull/${number}` : `/commit/${sha}`;
+  const repoUrl = `https://github.com/${owner}/${repo}`;
+  const eventUrl = `${repoUrl}${eventPath}`;
+  const checksUrl = `${repoUrl}${eventPath}/checks`;
+
   return {
     header: {
-      title: `<b>${name}</b>`,
-      subtitle: `<font color="${statusColor}">${status}</font>`
-      // imageUrl: 'https://developers.google.com/chat/images/quickstart-app-avatar.png',
-      // imageType: 'CIRCLE'
+      title: name,
+      subtitle: `${owner}/${repo}`,
+      imageUrl: 'https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png',
+      imageType: 'CIRCLE'
     },
     sections: [
       {
+        header: 'Status',
+        collapsible: true,
+        uncollapsibleWidgetsCount: 1,
         widgets: [
           {
-            columns: {
-              columnItems: [
-                {
-                  horizontalSizeStyle: 'FILL_AVAILABLE_SPACE',
-                  horizontalAlignment: 'START',
-                  verticalAlignment: 'TOP',
-                  widgets: [
-                    { textParagraph: { text: `<b>Status: <font color="${statusColor}">${status}</font></b>` } },
-                    { textParagraph: { text: `<b>Repository</b>: ${owner}/${repo}` } },
-                    { textParagraph: { text: `<b>Event</b>: ${eventName}` } },
-                    { textParagraph: { text: `<b>Ref</b>: ${ref}` } }
-                  ]
-                },
-                {
-                  horizontalSizeStyle: 'FILL_AVAILABLE_SPACE',
-                  horizontalAlignment: 'START',
-                  verticalAlignment: 'TOP',
-                  widgets: [
-                    { buttonList: { buttons: [{ text: 'Open Checks', onClick: { openLink: { url: checksUrl } }, disabled: false }] } },
-                    { buttonList: { buttons: [{ text: 'Open Repository', onClick: { openLink: { url: repoUrl } }, disabled: false }] } },
-                    { buttonList: { buttons: [{ text: 'Open Event', onClick: { openLink: { url: eventUrl } }, disabled: false }] } }
-                  ]
-                }
-              ]
+            decoratedText: {
+              icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/status_${statusType}.png` },
+              text: `<font color="${statusColor}">${statusName}</font>`,
+              button: { text: 'Open Checks', onClick: { openLink: { url: checksUrl } } }
+            }
+          }
+        ]
+      },
+      {
+        header: 'Repository',
+        collapsible: true,
+        uncollapsibleWidgetsCount: 1,
+        widgets: [
+          {
+            decoratedText: {
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/repo.png' },
+              text: `${owner}/${repo}`,
+              button: { text: 'Open Repository', onClick: { openLink: { url: repoUrl } } }
+            }
+          }
+        ]
+      },
+      {
+        header: 'Event',
+        collapsible: true,
+        uncollapsibleWidgetsCount: 1,
+        widgets: [
+          {
+            decoratedText: {
+              icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/event_${eventType}.png` },
+              text: eventNameFmt,
+              button: { text: 'Open Event', onClick: { openLink: { url: eventUrl } } }
+            }
+          }
+        ]
+      },
+      {
+        header: 'Ref',
+        collapsible: true,
+        uncollapsibleWidgetsCount: 1,
+        widgets: [
+          {
+            decoratedText: {
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/ref.png' },
+              text: ref
+            }
+          }
+        ]
+      },
+      {
+        header: 'Workflow',
+        collapsible: true,
+        uncollapsibleWidgetsCount: 1,
+        widgets: [
+          {
+            decoratedText: {
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/event_workflow_dispatch.png' },
+              text: workflow
+            }
+          }
+        ]
+      },
+      {
+        header: 'Actor',
+        collapsible: true,
+        uncollapsibleWidgetsCount: 1,
+        widgets: [
+          {
+            decoratedText: {
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/actor.png' },
+              text: actor
             }
           }
         ]
