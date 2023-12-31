@@ -32509,7 +32509,7 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
         widgets: [
           {
             decoratedText: {
-              icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/status_${statusType}.png` },
+              icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/status_${statusType}.png` },
               text: `<font color="${statusColor}">${statusName}</font>`,
               button: { text: 'Open Checks', onClick: { openLink: { url: checksUrl } } }
             }
@@ -32523,7 +32523,7 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
         widgets: [
           {
             decoratedText: {
-              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/repo.png' },
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/repo.png' },
               text: `${owner}/${repo}`,
               button: { text: 'Open Repository', onClick: { openLink: { url: repoUrl } } }
             }
@@ -32537,7 +32537,7 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
         widgets: [
           {
             decoratedText: {
-              icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/event_${eventType}.png` },
+              icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/event_${eventType}.png` },
               text: eventNameFmt,
               button: { text: 'Open Event', onClick: { openLink: { url: eventUrl } } }
             }
@@ -32551,7 +32551,7 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
         widgets: [
           {
             decoratedText: {
-              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/ref.png' },
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/ref.png' },
               text: ref
             }
           }
@@ -32564,7 +32564,7 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
         widgets: [
           {
             decoratedText: {
-              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/event_workflow_dispatch.png' },
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/event_workflow_dispatch.png' },
               text: workflow
             }
           }
@@ -32577,7 +32577,7 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
         widgets: [
           {
             decoratedText: {
-              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/feat/format/assets/actor.png' },
+              icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/actor.png' },
               text: actor
             }
           }
