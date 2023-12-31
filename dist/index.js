@@ -32404,12 +32404,18 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 4351:
+/***/ 1713:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const github = __nccwpck_require__(5438);
 const axios = __nccwpck_require__(8757);
 const core = __nccwpck_require__(2186);
+
+const colors = {
+  success: '#2cbe4e',
+  failure: '#ff0000',
+  other: '#ffc107'
+};
 
 /**
  * The main function for the action.
@@ -32427,7 +32433,7 @@ async function run() {
     if (!ok) {
       core.setFailed('error sending notification to google chat');
     } else {
-      console.info('Sent notification:', name, url, status);
+      core.debug(`Sent notification: ${name}, ${status}`);
     }
   } catch (e) {
     core.setFailed(`error sending notification to google chat: ${e}`);
@@ -32446,12 +32452,12 @@ async function sendNotification(name, url, status) {
   const statusLower = status.toLowerCase();
   let statusColor;
   if (statusLower === 'success') {
-    statusColor = '#2cbe4e';
+    statusColor = colors.success;
   } else if (statusLower === 'failure') {
-    statusColor = '#ff0000';
+    statusColor = colors.failure;
   } else {
     // if (statusLower === 'cancelled') {
-    statusColor = '#ffc107';
+    statusColor = colors.other;
   }
 
   const card = createCard({ name, status, statusColor, owner, repo, eventName, ref, checksUrl, repoUrl, eventUrl });
@@ -32459,10 +32465,10 @@ async function sendNotification(name, url, status) {
 
   try {
     const response = await axios.post(url, body);
-    console.info('request success with status:', response.status);
+    core.debug(`request success with status: ${response.status}`);
     return true;
   } catch (e) {
-    console.warn('request failed with error:', JSON.stringify(body), JSON.stringify(e.response?.data || ''));
+    core.debug(`request failed with error, body: ${JSON.stringify(body)}, response:${JSON.stringify(e.response?.data || '')}`);
     return false;
   }
 }
@@ -32516,12 +32522,7 @@ function createBody(name, card) {
 }
 
 // exports
-module.exports = { run };
-
-/**
- * The entrypoint for the action.
- */
-run();
+module.exports = { run, colors };
 
 
 /***/ }),
@@ -38758,12 +38759,18 @@ module.exports = JSON.parse('{"application/1d-interleaved-parityfec":{"source":"
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(4351);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/**
+ * The entrypoint for the action.
+ */
+const { run } = __nccwpck_require__(1713);
+
+run();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
