@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Google Chat Github Action'
+description: 'Send a notification to Google Chat with the result of a GitHub Action'
+author: 'JChrist'
 
 # Define your inputs here.
 inputs:
