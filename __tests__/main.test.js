@@ -108,43 +108,47 @@ describe('action', () => {
     expect(req.body.cardsV2[0].card.header.title).toContain('name');
     expect(req.body.cardsV2[0].card.header.subtitle).toContain(`${owner}/${repo}`);
 
-    const sections = req.body.cardsV2[0].card.sections;
+    const card = getCardFromBody(req.body);
 
-    expect(sections[0].header).toContain('Status');
-    expect(sections[0].widgets[0].decoratedText.text).toContain(main.colors.other);
-    expect(sections[0].widgets[0].decoratedText.text).toContain('Status');
-    expect(sections[0].widgets[0].decoratedText.icon.iconUrl).toContain('status_cancelled.png');
-    expect(sections[0].widgets[0].decoratedText.button.text).toContain('Open Checks');
-    expect(sections[0].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/pull/${issueNumber}/checks`);
+    const statusWidget = getStatusWidget(card);
+    expect(statusWidget.label).toContain('Status');
+    expect(statusWidget.text).toContain(main.colors.other);
+    expect(statusWidget.text).toContain('Status');
+    expect(statusWidget.iconUrl).toContain('status_cancelled.png');
+    expect(statusWidget.buttonText).toContain('Open Checks');
+    expect(statusWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/pull/${issueNumber}/checks`);
 
-    expect(sections[1].header).toContain('Repository');
-    expect(sections[1].widgets[0].decoratedText.text).toContain(`${owner}/${repo}`);
-    expect(sections[1].widgets[0].decoratedText.icon.iconUrl).toContain('repo.png');
-    expect(sections[1].widgets[0].decoratedText.button.text).toContain('Open Repository');
-    expect(sections[1].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}`);
+    const repoWidget = getRepoWidget(card);
+    expect(repoWidget.label).toContain('Repository');
+    expect(repoWidget.text).toContain(`${owner}/${repo}`);
+    expect(repoWidget.iconUrl).toContain('repo.png');
+    expect(repoWidget.buttonText).toContain('Open Repository');
+    expect(repoWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}`);
 
-    expect(sections[2].header).toContain('Event');
-    expect(sections[2].widgets[0].decoratedText.text).toContain('Pull Request');
-    expect(sections[2].widgets[0].decoratedText.icon.iconUrl).toContain('event_pull_request.png');
-    expect(sections[2].widgets[0].decoratedText.button.text).toContain('Open Event');
-    expect(sections[2].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/pull/${issueNumber}`);
+    const eventWidget = getEventWidget(card);
+    expect(eventWidget.label).toContain('Event');
+    expect(eventWidget.text).toContain('Pull Request');
+    expect(eventWidget.iconUrl).toContain('event_pull_request.png');
+    expect(eventWidget.buttonText).toContain('Open Event');
+    expect(eventWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/pull/${issueNumber}`);
 
-    expect(sections[3].header).toContain('Ref');
-    expect(sections[3].widgets[0].decoratedText.text).toContain(ref);
-    expect(sections[3].widgets[0].decoratedText.icon.iconUrl).toContain('ref.png');
-    expect(sections[3].widgets[0].decoratedText.button).toBeFalsy();
+    const refWidget = getRefWidget(card);
+    expect(refWidget.label).toContain('Ref');
+    expect(refWidget.text).toContain(ref);
+    expect(refWidget.iconUrl).toContain('ref.png');
+    expect(refWidget.buttonText).toBeFalsy();
 
-    // workflow
-    expect(sections[4].header).toContain('Workflow');
-    expect(sections[4].widgets[0].decoratedText.text).toContain(workflow);
-    expect(sections[4].widgets[0].decoratedText.icon.iconUrl).toContain('event_workflow_dispatch.png');
-    expect(sections[4].widgets[0].decoratedText.button).toBeFalsy();
+    const worfkflowWidget = getWorkflowWidget(card);
+    expect(worfkflowWidget.label).toContain('Workflow');
+    expect(worfkflowWidget.text).toContain(workflow);
+    expect(worfkflowWidget.iconUrl).toContain('event_workflow_dispatch.png');
+    expect(worfkflowWidget.buttonText).toBeFalsy();
 
-    // actor
-    expect(sections[5].header).toContain('Actor');
-    expect(sections[5].widgets[0].decoratedText.text).toContain(actor);
-    expect(sections[5].widgets[0].decoratedText.icon.iconUrl).toContain('actor.png');
-    expect(sections[5].widgets[0].decoratedText.button).toBeFalsy();
+    const actorWidget = getActorWidget(card);
+    expect(actorWidget.label).toContain('Actor');
+    expect(actorWidget.text).toContain(actor);
+    expect(actorWidget.iconUrl).toContain('actor.png');
+    expect(actorWidget.buttonText).toBeFalsy();
   });
 
   it('handles and reports axios failure', async () => {
@@ -172,7 +176,7 @@ describe('action', () => {
     expect(axiosMock).toHaveBeenCalled();
     expect(capture).toHaveLength(1);
 
-    const statusText = capture[0].body.cardsV2[0].card.sections[0].widgets[0].decoratedText.text;
+    const statusText = getStatusWidget(getCardFromBody(capture[0].body)).text;
     expect(statusText).toContain(main.colors.success);
     expect(JSON.stringify(capture[0].body)).not.toContain(main.colors.failure);
     expect(JSON.stringify(capture[0].body)).not.toContain(main.colors.other);
@@ -190,7 +194,7 @@ describe('action', () => {
 
     expect(axiosMock).toHaveBeenCalled();
     expect(capture).toHaveLength(1);
-    const statusText = capture[0].body.cardsV2[0].card.sections[0].widgets[0].decoratedText.text;
+    const statusText = getStatusWidget(getCardFromBody(capture[0].body)).text;
     expect(statusText).toContain(main.colors.failure);
     expect(JSON.stringify(capture[0].body)).not.toContain(main.colors.success);
     expect(JSON.stringify(capture[0].body)).not.toContain(main.colors.other);
@@ -208,7 +212,7 @@ describe('action', () => {
 
     expect(axiosMock).toHaveBeenCalled();
     expect(capture).toHaveLength(1);
-    const statusText = capture[0].body.cardsV2[0].card.sections[0].widgets[0].decoratedText.text;
+    const statusText = getStatusWidget(getCardFromBody(capture[0].body)).text;
     expect(statusText).toContain(main.colors.other);
     expect(JSON.stringify(capture[0].body)).not.toContain(main.colors.success);
     expect(JSON.stringify(capture[0].body)).not.toContain(main.colors.failure);
@@ -232,19 +236,22 @@ describe('action', () => {
 
     const { owner, repo, sha } = mockData;
 
-    const sections = capture[0].body.cardsV2[0].card.sections;
+    const card = getCardFromBody(capture[0].body);
 
-    expect(sections[0].widgets[0].decoratedText.button.text).toContain('Open Checks');
-    expect(sections[0].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/commit/${sha}/checks`);
+    const statusWidget = getStatusWidget(card);
+    expect(statusWidget.buttonText).toContain('Open Checks');
+    expect(statusWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}/checks`);
 
-    expect(sections[1].widgets[0].decoratedText.button.text).toContain('Open Repository');
-    expect(sections[1].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}`);
+    const repoWidget = getRepoWidget(card);
+    expect(repoWidget.buttonText).toContain('Open Repository');
+    expect(repoWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}`);
 
-    expect(sections[2].header).toContain('Event');
-    expect(sections[2].widgets[0].decoratedText.text).toContain('Push');
-    expect(sections[2].widgets[0].decoratedText.icon.iconUrl).toContain('event_push.png');
-    expect(sections[2].widgets[0].decoratedText.button.text).toContain('Open Event');
-    expect(sections[2].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
+    const eventWidget = getEventWidget(card);
+    expect(eventWidget.label).toContain('Event');
+    expect(eventWidget.text).toContain('Push');
+    expect(eventWidget.iconUrl).toContain('event_push.png');
+    expect(eventWidget.buttonText).toContain('Open Event');
+    expect(eventWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
   });
 
   it('sends notification for workflow dispatch', async () => {
@@ -265,19 +272,22 @@ describe('action', () => {
 
     const { owner, repo, sha } = mockData;
 
-    const sections = capture[0].body.cardsV2[0].card.sections;
+    const card = getCardFromBody(capture[0].body);
 
-    expect(sections[0].widgets[0].decoratedText.button.text).toContain('Open Checks');
-    expect(sections[0].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/commit/${sha}/checks`);
+    const statusWidget = getStatusWidget(card);
+    expect(statusWidget.buttonText).toContain('Open Checks');
+    expect(statusWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}/checks`);
 
-    expect(sections[1].widgets[0].decoratedText.button.text).toContain('Open Repository');
-    expect(sections[1].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}`);
+    const repoWidget = getRepoWidget(card);
+    expect(repoWidget.buttonText).toContain('Open Repository');
+    expect(repoWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}`);
 
-    expect(sections[2].header).toContain('Event');
-    expect(sections[2].widgets[0].decoratedText.text).toContain('Workflow Dispatch');
-    expect(sections[2].widgets[0].decoratedText.icon.iconUrl).toContain('event_workflow_dispatch.png');
-    expect(sections[2].widgets[0].decoratedText.button.text).toContain('Open Event');
-    expect(sections[2].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
+    const eventWidget = getEventWidget(card);
+    expect(eventWidget.label).toContain('Event');
+    expect(eventWidget.text).toContain('Workflow Dispatch');
+    expect(eventWidget.iconUrl).toContain('event_workflow_dispatch.png');
+    expect(eventWidget.buttonText).toContain('Open Event');
+    expect(eventWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
   });
 
   it('sends notification for unknown event as push', async () => {
@@ -298,19 +308,22 @@ describe('action', () => {
 
     const { owner, repo, sha } = mockData;
 
-    const sections = capture[0].body.cardsV2[0].card.sections;
+    const card = getCardFromBody(capture[0].body);
 
-    expect(sections[0].widgets[0].decoratedText.button.text).toContain('Open Checks');
-    expect(sections[0].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/commit/${sha}/checks`);
+    const statusWidget = getStatusWidget(card);
+    expect(statusWidget.buttonText).toContain('Open Checks');
+    expect(statusWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}/checks`);
 
-    expect(sections[1].widgets[0].decoratedText.button.text).toContain('Open Repository');
-    expect(sections[1].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}`);
+    const repoWidget = getRepoWidget(card);
+    expect(repoWidget.buttonText).toContain('Open Repository');
+    expect(repoWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}`);
 
-    expect(sections[2].header).toContain('Event');
-    expect(sections[2].widgets[0].decoratedText.text).toContain('Push');
-    expect(sections[2].widgets[0].decoratedText.icon.iconUrl).toContain('event_push.png');
-    expect(sections[2].widgets[0].decoratedText.button.text).toContain('Open Event');
-    expect(sections[2].widgets[0].decoratedText.button.onClick.openLink.url).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
+    const eventWidget = getEventWidget(card);
+    expect(eventWidget.label).toContain('Event');
+    expect(eventWidget.text).toContain('Push');
+    expect(eventWidget.iconUrl).toContain('event_push.png');
+    expect(eventWidget.buttonText).toContain('Open Event');
+    expect(eventWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
   });
 
   function setupGithubContext() {
@@ -325,5 +338,38 @@ describe('action', () => {
         actor: mockData.actor
       }
     });
+  }
+
+  function getCardFromBody(body) {
+    return body.cardsV2[0].card;
+  }
+
+  function getCardWidget(card, num) {
+    const dt = card.sections[0].widgets[num].decoratedText;
+    return { label: dt.topLabel, text: dt.text, iconUrl: dt.icon?.iconUrl, buttonText: dt.button?.text, buttonUrl: dt.button?.onClick?.openLink?.url };
+  }
+
+  function getStatusWidget(card) {
+    return getCardWidget(card, 0);
+  }
+
+  function getRepoWidget(card) {
+    return getCardWidget(card, 1);
+  }
+
+  function getEventWidget(card) {
+    return getCardWidget(card, 2);
+  }
+
+  function getRefWidget(card) {
+    return getCardWidget(card, 3);
+  }
+
+  function getWorkflowWidget(card) {
+    return getCardWidget(card, 4);
+  }
+
+  function getActorWidget(card) {
+    return getCardWidget(card, 5);
   }
 });

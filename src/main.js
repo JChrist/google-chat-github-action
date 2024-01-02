@@ -94,81 +94,51 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
     },
     sections: [
       {
-        header: 'Status',
         collapsible: true,
         uncollapsibleWidgetsCount: 1,
         widgets: [
           {
             decoratedText: {
               icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/status_${statusType}.png` },
+              topLabel: 'Status',
               text: `<font color="${statusColor}">${statusName}</font>`,
               button: { text: 'Open Checks', onClick: { openLink: { url: checksUrl } } }
             }
-          }
-        ]
-      },
-      {
-        header: 'Repository',
-        collapsible: true,
-        uncollapsibleWidgetsCount: 1,
-        widgets: [
+          },
           {
             decoratedText: {
               icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/repo.png' },
+              topLabel: 'Repository',
               text: `${owner}/${repo}`,
               button: { text: 'Open Repository', onClick: { openLink: { url: repoUrl } } }
             }
-          }
-        ]
-      },
-      {
-        header: 'Event',
-        collapsible: true,
-        uncollapsibleWidgetsCount: 1,
-        widgets: [
+          },
           {
             decoratedText: {
               icon: { iconUrl: `https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/event_${eventType}.png` },
+              topLabel: 'Event',
               text: eventNameFmt,
               button: { text: 'Open Event', onClick: { openLink: { url: eventUrl } } }
             }
-          }
-        ]
-      },
-      {
-        header: 'Ref',
-        collapsible: true,
-        uncollapsibleWidgetsCount: 1,
-        widgets: [
+          },
           {
             decoratedText: {
               icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/ref.png' },
+              topLabel: 'Ref',
               text: ref
             }
-          }
-        ]
-      },
-      {
-        header: 'Workflow',
-        collapsible: true,
-        uncollapsibleWidgetsCount: 1,
-        widgets: [
+          },
           {
             decoratedText: {
               icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/event_workflow_dispatch.png' },
+              topLabel: 'Workflow',
               text: workflow
             }
-          }
-        ]
-      },
-      {
-        header: 'Actor',
-        collapsible: true,
-        uncollapsibleWidgetsCount: 1,
-        widgets: [
+          },
           {
             decoratedText: {
               icon: { iconUrl: 'https://raw.githubusercontent.com/JChrist/google-chat-github-action/main/assets/actor.png' },
+              topLabel: 'Actor',
               text: actor
             }
           }
