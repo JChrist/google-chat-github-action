@@ -32432,10 +32432,21 @@ async function run() {
     const name = core.getInput('name', { required: true });
     const url = core.getInput('url', { required: true });
     const status = core.getInput('status', { required: true });
+    const collapseInput = core.getInput('collapse');
+    const defaultCollapse = -1;
+    let collapse;
+    if (collapseInput == null || collapseInput === '') {
+      collapse = defaultCollapse;
+    } else {
+      collapse = parseInt(collapseInput);
+      if (isNaN(collapse)) {
+        collapse = defaultCollapse;
+      }
+    }
 
-    core.debug(`input params: name=${name}, status=${status}, url=${url}`);
+    core.debug(`input params: name=${name}, status=${status}, url=${url}, collapse=${collapse}`);
 
-    const ok = await sendNotification(name, url, status);
+    const ok = await sendNotification(name, url, status, collapse);
     if (!ok) {
       core.setFailed('error sending notification to google chat');
     } else {
@@ -32446,12 +32457,12 @@ async function run() {
   }
 }
 
-async function sendNotification(name, url, status) {
+async function sendNotification(name, url, status, collapse) {
   const { owner, repo } = github.context.repo;
   const { eventName, sha, ref, actor, workflow } = github.context;
   const { number } = github.context.issue;
 
-  const card = createCard({ name, status, owner, repo, eventName, ref, actor, workflow, sha, number });
+  const card = createCard({ name, status, owner, repo, eventName, ref, actor, workflow, sha, number, collapse });
   const body = createBody(name, card);
 
   try {
@@ -32464,7 +32475,7 @@ async function sendNotification(name, url, status) {
   }
 }
 
-function createCard({ name, status, owner, repo, eventName, ref, actor, workflow, sha, number }) {
+function createCard({ name, status, owner, repo, eventName, ref, actor, workflow, sha, number, collapse }) {
   const statusLower = status.toLowerCase();
   let statusColor;
   const statusName = status.substring(0, 1).toUpperCase() + status.substring(1);
@@ -32503,8 +32514,8 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
     },
     sections: [
       {
-        collapsible: true,
-        uncollapsibleWidgetsCount: 1,
+        collapsible: collapse >= 0,
+        uncollapsibleWidgetsCount: collapse,
         widgets: [
           {
             decoratedText: {

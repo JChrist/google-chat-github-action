@@ -54,7 +54,7 @@ describe('action', () => {
     expect(runMock).toHaveReturned();
 
     // Verify that all of the core library functions were called correctly
-    expect(debugMock).toHaveBeenCalledWith(`input params: name=name, status=status, url=url`);
+    expect(debugMock).toHaveBeenCalledWith('input params: name=name, status=status, url=url, collapse=-1');
   });
 
   it('sets a failed status', async () => {
@@ -68,22 +68,62 @@ describe('action', () => {
     expect(setFailedMock).toHaveBeenCalled();
   });
 
-  it('fails if input is not provided', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'name':
-          throw new Error('invalid name');
-        default:
-          return '';
-      }
+  describe('inputs', () => {
+    it('fails if required input is not provided', async () => {
+      // Set the action's inputs as return values from core.getInput()
+      getInputMock.mockImplementation(name => {
+        switch (name) {
+          case 'name':
+            throw new Error('invalid name');
+          default:
+            return '';
+        }
+      });
+
+      await main.run();
+      expect(runMock).toHaveReturned();
+
+      // Verify that all of the core library functions were called correctly
+      expect(setFailedMock).toHaveBeenCalled();
     });
 
-    await main.run();
-    expect(runMock).toHaveReturned();
+    it('reads and converts custom collapse', async () => {
+      // Set the action's inputs as return values from core.getInput()
+      getInputMock.mockImplementation(input => {
+        if (['name', 'url', 'status'].includes(input)) {
+          return input;
+        }
+        if (input === 'collapse') {
+          return '5';
+        }
+        return '';
+      });
 
-    // Verify that all of the core library functions were called correctly
-    expect(setFailedMock).toHaveBeenCalled();
+      await main.run();
+      expect(runMock).toHaveReturned();
+
+      // Verify that all of the core library functions were called correctly
+      expect(debugMock).toHaveBeenCalledWith('input params: name=name, status=status, url=url, collapse=5');
+    });
+
+    it('reads and converts invalid collapse', async () => {
+      // Set the action's inputs as return values from core.getInput()
+      getInputMock.mockImplementation(input => {
+        if (['name', 'url', 'status'].includes(input)) {
+          return input;
+        }
+        if (input === 'collapse') {
+          return 'asd';
+        }
+        return '';
+      });
+
+      await main.run();
+      expect(runMock).toHaveReturned();
+
+      // Verify that all of the core library functions were called correctly
+      expect(debugMock).toHaveBeenCalledWith('input params: name=name, status=status, url=url, collapse=-1');
+    });
   });
 
   it('performs request for notification', async () => {
