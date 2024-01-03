@@ -95,7 +95,17 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
   const repoUrl = `https://github.com/${owner}/${repo}`;
   const eventUrl = `${repoUrl}${eventPath}`;
   const checksUrl = `${repoUrl}${eventPath}/checks`;
-
+  const showNameWidget = name.length >= 45; // google chat truncates title header if too long
+  const nameWidgets = [];
+  if (showNameWidget) {
+    nameWidgets.push({
+      decoratedText: {
+        topLabel: 'Name',
+        text: name,
+        wrapText: true
+      }
+    });
+  }
   return {
     header: {
       title: name,
@@ -152,7 +162,8 @@ function createCard({ name, status, owner, repo, eventName, ref, actor, workflow
               topLabel: 'Actor',
               text: actor
             }
-          }
+          },
+          ...nameWidgets
         ]
       }
     ]

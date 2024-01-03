@@ -366,6 +366,32 @@ describe('action', () => {
     expect(eventWidget.buttonUrl).toContain(`https://github.com/${owner}/${repo}/commit/${sha}`);
   });
 
+  it('adds name widget if name too long', async () => {
+    const name = 'Too long name that will get truncated by google chat if put on card header';
+    getInputMock.mockImplementation(input => {
+      if (input === 'status') return 'Success';
+      if (input === 'name') return name;
+      return input;
+    });
+    const capture = [];
+    axiosMock.mockImplementation((url, body) => {
+      capture.push({ url, body });
+      return { status: 200, data: 'ok' };
+    });
+    await main.run();
+    expect(runMock).toHaveReturned();
+
+    expect(axiosMock).toHaveBeenCalled();
+    expect(capture).toHaveLength(1);
+
+    const card = getCardFromBody(capture[0].body);
+    const nameWidget = getCardWidget(card, 6);
+
+    expect(nameWidget.label).toContain('Name');
+    expect(nameWidget.text).toContain(name);
+    expect(nameWidget.wrapText).toBeTruthy();
+  });
+
   function setupGithubContext() {
     Object.defineProperty(github, 'context', {
       value: {
@@ -386,7 +412,14 @@ describe('action', () => {
 
   function getCardWidget(card, num) {
     const dt = card.sections[0].widgets[num].decoratedText;
-    return { label: dt.topLabel, text: dt.text, iconUrl: dt.icon?.iconUrl, buttonText: dt.button?.text, buttonUrl: dt.button?.onClick?.openLink?.url };
+    return {
+      label: dt.topLabel,
+      text: dt.text,
+      iconUrl: dt.icon?.iconUrl,
+      buttonText: dt.button?.text,
+      buttonUrl: dt.button?.onClick?.openLink?.url,
+      wrapText: dt.wrapText
+    };
   }
 
   function getStatusWidget(card) {
