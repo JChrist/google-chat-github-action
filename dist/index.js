@@ -34444,7 +34444,7 @@ module.exports = parseParams
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
-// Axios v1.6.3 Copyright (c) 2023 Matt Zabriskie and contributors
+// Axios v1.6.5 Copyright (c) 2024 Matt Zabriskie and contributors
 
 
 const FormData$1 = __nccwpck_require__(4334);
@@ -35814,6 +35814,9 @@ function arrayToObject(arr) {
 function formDataToJSON(formData) {
   function buildPath(path, value, target, index) {
     let name = path[index++];
+
+    if (name === '__proto__') return true;
+
     const isNumericKey = Number.isFinite(+name);
     const isLast = index >= path.length;
     name = !name && utils$1.isArray(target) ? target.length : name;
@@ -36465,7 +36468,7 @@ function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 }
 
-const VERSION = "1.6.3";
+const VERSION = "1.6.5";
 
 function parseProtocol(url) {
   const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url);
@@ -37096,6 +37099,10 @@ const httpAdapter = isHttpAdapterSupported && function httpAdapter(config) {
       // hotfix to support opt.all option which is required for node 20.x
       lookup = (hostname, opt, cb) => {
         _lookup(hostname, opt, (err, arg0, arg1) => {
+          if (err) {
+            return cb(err);
+          }
+
           const addresses = utils$1.isArray(arg0) ? arg0.map(addr => buildAddressEntry(addr)) : [buildAddressEntry(arg0, arg1)];
 
           opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
