@@ -11,9 +11,13 @@ name: Check Transpiled JavaScript
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   check-dist:
@@ -22,6 +26,7 @@ jobs:
 
     permissions:
       contents: read
+      pull-requests: write
       statuses: write
 
     steps:
@@ -40,39 +45,20 @@ jobs:
         id: install
         run: npm ci
 
-      - name: Execute all required jobs
-        id: run-all
+      - name: Build dist/ Directory
+        id: build
         run: npm run all
-
-      - name: Commit & Push changes
-        id: commit-and-push
-        run: |
-          changes=$(git diff --ignore-space-at-eol --text | wc -l)
-          if [[ -n "$changes" && "$changes" -gt "0" ]]; then
-            echo "found changes, committing and pushing"
-            git add .
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: files changed with npm run all"
-            git push
-          fi
 
       # This will fail the workflow if the PR wasn't created by Dependabot.
       - name: Compare Directories
         id: diff
         run: |
-          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
-            echo "Detected uncommitted changes after build. See status below:"
-            git diff --ignore-space-at-eol --text dist/
-            exit 1
+          changedFiles=$(git diff --ignore-space-at-eol --text | wc -l)
+          if [[ -n "$changes" && "$changes" -gt "0" ]]; then
+            echo "committing and pushing changes"
+            git add .
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: automatic build changes"
+            git push
           fi
-
-      # If `dist/` was different than expected, and this was not a Dependabot
-      # PR, upload the expected version as a workflow artifact.
-      - if: ${{ failure() && steps.diff.outcome == 'failure' }}
-        name: Upload Artifact
-        id: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
