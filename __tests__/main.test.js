@@ -178,11 +178,11 @@ describe('action', () => {
     expect(refWidget.iconUrl).toContain('ref.png');
     expect(refWidget.buttonText).toBeFalsy();
 
-    const worfkflowWidget = getWorkflowWidget(card);
-    expect(worfkflowWidget.label).toContain('Workflow');
-    expect(worfkflowWidget.text).toContain(workflow);
-    expect(worfkflowWidget.iconUrl).toContain('event_workflow_dispatch.png');
-    expect(worfkflowWidget.buttonText).toBeFalsy();
+    const workflowWidget = getWorkflowWidget(card);
+    expect(workflowWidget.label).toContain('Workflow');
+    expect(workflowWidget.text).toContain(workflow);
+    expect(workflowWidget.iconUrl).toContain('event_workflow_dispatch.png');
+    expect(workflowWidget.buttonText).toBeFalsy();
 
     const actorWidget = getActorWidget(card);
     expect(actorWidget.label).toContain('Actor');
