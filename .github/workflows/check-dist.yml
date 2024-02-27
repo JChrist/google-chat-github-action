@@ -11,9 +11,6 @@ name: Check Transpiled JavaScript
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
 
 permissions:
   contents: write
@@ -25,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       statuses: write
 
@@ -49,16 +46,30 @@ jobs:
         id: build
         run: npm run all
 
-      # This will fail the workflow if the PR wasn't created by Dependabot.
-      - name: Compare Directories
-        id: diff
+      - name: Check for changes
+        id: changes
         run: |
-          changedFiles=$(git diff --ignore-space-at-eol --text | wc -l)
+          changes=$(git diff --ignore-space-at-eol --text | wc -l)
           if [[ -n "$changes" && "$changes" -gt "0" ]]; then
-            echo "committing and pushing changes"
-            git add .
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: automatic build changes"
-            git push
+            echo "changes detected"
+            echo "CHANGES=true" >> $GITHUB_ENV
+          else
+            echo "no changes"
           fi
+
+      - name: Commit & Push changes
+        id: commit-push
+        if: ${{success() && env.CHANGES=='true'}}
+        run: |
+          # generate key to sign commit
+          mkdir -p /tmp/key
+          ssh-keygen -t ed25519 -C 'github-actions[bot]@users.noreply.github.com' -f /tmp/key/id_ed25519 -N ''
+          git add .
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.signingkey '/tmp/key/id_ed25519'
+          git config gpg.format ssh
+          git config commit.gpgsign true
+          git commit -m "chore: automatic build changes"
+          git push
+          rm -rm /tmp/key
