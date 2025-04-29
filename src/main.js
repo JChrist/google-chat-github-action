@@ -37,9 +37,9 @@ async function run() {
 
     core.debug(`input params: name=${name}, status=${status}, url=${url}, collapse=${collapse}`);
 
-    const ok = await sendNotification(name, url, status, collapse);
-    if (!ok) {
-      core.setFailed('error sending notification to google chat');
+    const resp = await sendNotification(name, url, status, collapse);
+    if (!resp?.ok) {
+      core.setFailed(`error sending notification to google chat: ${JSON.stringify(resp?.error?.response?.data || 'no-response-data')}`);
     } else {
       core.debug(`Sent notification: ${name}, ${status}`);
     }
@@ -59,10 +59,10 @@ async function sendNotification(name, url, status, collapse) {
   try {
     const response = await axios.post(url, body);
     core.debug(`request success with status: ${response.status}`);
-    return true;
+    return { ok: true, data: response.data };
   } catch (e) {
     core.debug(`request failed with error, body: ${JSON.stringify(body)}, response:${JSON.stringify(e.response?.data || '')}`);
-    return false;
+    return { ok: false, error: e };
   }
 }
 

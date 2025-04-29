@@ -35,7 +35,7 @@ jobs:
         id: setup-node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .node-version
+          node-version: 'lts/*'
           cache: npm
 
       - name: Install Dependencies
@@ -72,4 +72,4 @@ jobs:
           git config commit.gpgsign true
           git commit -m "chore: automatic build changes"
           git push
-          rm -rm /tmp/key
+          rm -rf /tmp/key
