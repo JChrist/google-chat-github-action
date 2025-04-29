@@ -1,7 +1,6 @@
 # Google Chat GitHub Action
 
-[![Google Chat Github Action](https://github.com/jchrist/google-chat-github-action/actions/workflows/linter.yml/badge.svg)](https://github.com/jchrist/google-chat-action)
-![CI](https://github.com/jchrist/google-chat-github-action/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/jchrist/google-chat-github-action/actions/workflows/ci.yml/badge.svg)](https://github.com/JChrist/google-chat-github-action)
 ![Coverage](./badges/coverage.svg)
 
 Send a notification to Google Chat with the result of a GitHub Action, using Cards V2
