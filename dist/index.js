@@ -36589,16 +36589,16 @@ module.exports = parseParams
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
-/*! Axios v1.13.1 Copyright (c) 2025 Matt Zabriskie and contributors */
+/*! Axios v1.13.2 Copyright (c) 2025 Matt Zabriskie and contributors */
 
 
 const FormData$1 = __nccwpck_require__(6454);
 const crypto = __nccwpck_require__(6982);
 const url = __nccwpck_require__(7016);
-const http2 = __nccwpck_require__(5675);
 const proxyFromEnv = __nccwpck_require__(7777);
 const http = __nccwpck_require__(8611);
 const https = __nccwpck_require__(5692);
+const http2 = __nccwpck_require__(5675);
 const util = __nccwpck_require__(9023);
 const followRedirects = __nccwpck_require__(1573);
 const zlib = __nccwpck_require__(3106);
@@ -36613,6 +36613,7 @@ const url__default = /*#__PURE__*/_interopDefaultLegacy(url);
 const proxyFromEnv__default = /*#__PURE__*/_interopDefaultLegacy(proxyFromEnv);
 const http__default = /*#__PURE__*/_interopDefaultLegacy(http);
 const https__default = /*#__PURE__*/_interopDefaultLegacy(https);
+const http2__default = /*#__PURE__*/_interopDefaultLegacy(http2);
 const util__default = /*#__PURE__*/_interopDefaultLegacy(util);
 const followRedirects__default = /*#__PURE__*/_interopDefaultLegacy(followRedirects);
 const zlib__default = /*#__PURE__*/_interopDefaultLegacy(zlib);
@@ -38749,7 +38750,7 @@ function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
   return requestedURL;
 }
 
-const VERSION = "1.13.1";
+const VERSION = "1.13.2";
 
 function parseProtocol(url) {
   const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url);
@@ -39326,13 +39327,6 @@ const brotliOptions = {
   finishFlush: zlib__default["default"].constants.BROTLI_OPERATION_FLUSH
 };
 
-const {
-  HTTP2_HEADER_SCHEME,
-  HTTP2_HEADER_METHOD,
-  HTTP2_HEADER_PATH,
-  HTTP2_HEADER_STATUS
-} = http2.constants;
-
 const isBrotliSupported = utils$1.isFunction(zlib__default["default"].createBrotliDecompress);
 
 const {http: httpFollow, https: httpsFollow} = followRedirects__default["default"];
@@ -39362,9 +39356,9 @@ class Http2Sessions {
       sessionTimeout: 1000
     }, options);
 
-    let authoritySessions;
+    let authoritySessions = this.sessions[authority];
 
-    if ((authoritySessions = this.sessions[authority])) {
+    if (authoritySessions) {
       let len = authoritySessions.length;
 
       for (let i = 0; i < len; i++) {
@@ -39375,7 +39369,7 @@ class Http2Sessions {
       }
     }
 
-    const session = http2.connect(authority, options);
+    const session = http2__default["default"].connect(authority, options);
 
     let removed;
 
@@ -39390,11 +39384,12 @@ class Http2Sessions {
 
       while (i--) {
         if (entries[i][0] === session) {
-          entries.splice(i, 1);
           if (len === 1) {
             delete this.sessions[authority];
-            return;
+          } else {
+            entries.splice(i, 1);
           }
+          return;
         }
       }
     };
@@ -39433,12 +39428,12 @@ class Http2Sessions {
 
     session.once('close', removeSession);
 
-    let entries = this.sessions[authority], entry = [
-      session,
-      options
-    ];
+    let entry = [
+        session,
+        options
+      ];
 
-    entries ? this.sessions[authority].push(entry) : authoritySessions =  this.sessions[authority] = [entry];
+    authoritySessions ? authoritySessions.push(entry) : authoritySessions =  this.sessions[authority] = [entry];
 
     return session;
   }
@@ -39565,6 +39560,13 @@ const http2Transport = {
       const {http2Options, headers} = options;
 
       const session = http2Sessions.getSession(authority, http2Options);
+
+      const {
+        HTTP2_HEADER_SCHEME,
+        HTTP2_HEADER_METHOD,
+        HTTP2_HEADER_PATH,
+        HTTP2_HEADER_STATUS
+      } = http2__default["default"].constants;
 
       const http2Headers = {
         [HTTP2_HEADER_SCHEME]: options.protocol.replace(':', ''),
@@ -40145,6 +40147,9 @@ const httpAdapter = isHttpAdapterSupported && function httpAdapter(config) {
           req
         ));
       });
+    } else {
+      // explicitly reset the socket timeout value for a possible `keep-alive` request
+      req.setTimeout(0);
     }
 
 
