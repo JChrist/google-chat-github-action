@@ -10,7 +10,7 @@
   "bugs": {"url": "https://github.com/jchrist/google-chat-github-action/issues"},
   "keywords": ["GitHub", "Actions", "Google", "Chat", "notification"],
   "exports": {".": "./dist/index.js"},
-  "engines": {"node": ">=20"},
+  "engines": {"node": ">=24"},
   "scripts": {
     "bundle": "npm run format:write && npm run package",
     "ci-test": "jest",
