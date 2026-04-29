@@ -1,6 +1,5 @@
-const github = require('@actions/github');
 const axios = require('axios');
-const core = require('@actions/core');
+const actions = require('./actions');
 
 const colors = {
   success: '#2cbe4e',
@@ -19,6 +18,7 @@ const events = {
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
+  const core = await actions.getCore();
   try {
     const name = core.getInput('name', { required: true });
     const url = core.getInput('url', { required: true });
@@ -49,6 +49,7 @@ async function run() {
 }
 
 async function sendNotification(name, url, status, collapse) {
+  const [core, github] = await Promise.all([actions.getCore(), actions.getGithub()]);
   const { owner, repo } = github.context.repo;
   const { eventName, sha, ref, actor, workflow } = github.context;
   const { number } = github.context.issue;
