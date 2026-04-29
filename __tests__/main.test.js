@@ -1,10 +1,19 @@
 /**
  * Unit tests for the action's main functionality, src/main.js
  */
-const core = require('@actions/core');
 const axios = require('axios');
-const github = require('@actions/github');
+const actions = require('../src/actions');
 const main = require('../src/main');
+
+const core = {
+  debug: jest.fn(),
+  getInput: jest.fn(),
+  setFailed: jest.fn()
+};
+
+const github = {
+  context: {}
+};
 
 // Mock the GitHub Actions core library
 const debugMock = jest.spyOn(core, 'debug').mockImplementation();
@@ -14,8 +23,8 @@ const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation();
 
 // mock axios
 const axiosMock = jest.spyOn(axios, 'post').mockImplementation();
-
-const originalGithubContext = { ...github.context };
+jest.spyOn(actions, 'getCore').mockResolvedValue(core);
+jest.spyOn(actions, 'getGithub').mockResolvedValue(github);
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run');
@@ -35,10 +44,6 @@ describe('action', () => {
     mockData.workflow = 'test workflow';
     mockData.actor = 'jchrist';
     setupGithubContext();
-  });
-
-  afterEach(() => {
-    Object.defineProperty(github, 'context', { value: originalGithubContext });
   });
 
   it('reads and debugs inputs', async () => {
@@ -393,17 +398,15 @@ describe('action', () => {
   });
 
   function setupGithubContext() {
-    Object.defineProperty(github, 'context', {
-      value: {
-        repo: { owner: mockData.owner, repo: mockData.repo },
-        eventName: mockData.eventName,
-        ref: mockData.ref,
-        sha: mockData.sha,
-        issue: { number: mockData.issueNumber },
-        workflow: mockData.workflow,
-        actor: mockData.actor
-      }
-    });
+    github.context = {
+      repo: { owner: mockData.owner, repo: mockData.repo },
+      eventName: mockData.eventName,
+      ref: mockData.ref,
+      sha: mockData.sha,
+      issue: { number: mockData.issueNumber },
+      workflow: mockData.workflow,
+      actor: mockData.actor
+    };
   }
 
   function getCardFromBody(body) {
