@@ -1,9 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import jest from "eslint-plugin-jest";
 import globals from "globals";
-import babelParser from "@babel/eslint-parser";
 import eslintjs from "@eslint/js";
-import github from "eslint-plugin-github";
 
 export default defineConfig([
   globalIgnores([
@@ -16,8 +14,7 @@ export default defineConfig([
   eslintjs.configs.recommended,
   {
     plugins: {
-      jest,
-      github
+      jest
     },
 
     languageOptions: {
@@ -29,19 +26,8 @@ export default defineConfig([
         SharedArrayBuffer: "readonly"
       },
 
-      parser: babelParser,
       ecmaVersion: 2023,
-      sourceType: "module",
-
-      parserOptions: {
-        requireConfigFile: false,
-
-        babelOptions: {
-          babelrc: false,
-          configFile: false,
-          presets: ["jest"]
-        }
-      }
+      sourceType: "module"
     },
 
     rules: {
