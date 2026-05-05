@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "@babel/eslint-parser": "^7.28.6",
     "@babel/preset-env": "^7.29.3",
     "@eslint/js": "^10.0.1",
     "@rollup/plugin-commonjs": "^29.0.0",
@@ -38,7 +37,6 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "babel-preset-jest": "^30.3.0",
     "eslint": "^10.3.0",
-    "eslint-plugin-github": "^6.0.0",
     "eslint-plugin-jest": "^29.15.2",
     "globals": "^17.6.0",
     "jest": "^30.3.0",
