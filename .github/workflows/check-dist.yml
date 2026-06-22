@@ -57,9 +57,11 @@ jobs:
             echo "no changes"
           fi
 
+      # Push the rebuilt dist/ to the source branch; main is protected and
+      # rejects direct pushes, so it is resynced via the merged PR instead.
       - name: Commit & Push changes
         id: commit-push
-        if: ${{success() && env.CHANGES=='true' && github.ref == 'refs/heads/main'}}
+        if: ${{success() && env.CHANGES=='true' && github.ref != 'refs/heads/main'}}
         run: |
           # generate key to sign commit
           mkdir -p /tmp/key
