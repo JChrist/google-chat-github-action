@@ -57,21 +57,24 @@ jobs:
             echo "no changes"
           fi
 
-      # Push the rebuilt dist/ to the source branch; main is protected and
+      # Push the rebuilt dist/ to the source branch via the deploy key. Pushing
+      # with a deploy key (not GITHUB_TOKEN) re-triggers CI on the new commit, so
+      # required checks re-run and auto-merge can proceed. main is protected and
       # rejects direct pushes, so it is resynced via the merged PR instead.
       - name: Commit & Push changes
         id: commit-push
         if: ${{success() && env.CHANGES=='true' && github.ref != 'refs/heads/main'}}
+        env:
+          DEPLOY_KEY: ${{ secrets.DIST_DEPLOY_KEY }}
         run: |
-          # generate key to sign commit
-          mkdir -p /tmp/key
-          ssh-keygen -t ed25519 -C 'github-actions[bot]@users.noreply.github.com' -f /tmp/key/id_ed25519 -N ''
-          git add .
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/dist_deploy_key
+          chmod 600 ~/.ssh/dist_deploy_key
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/dist_deploy_key -o StrictHostKeyChecking=accept-new"
+          git remote set-url origin "git@github.com:${{ github.repository }}.git"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.signingkey '/tmp/key/id_ed25519'
-          git config gpg.format ssh
-          git config commit.gpgsign true
+          git add .
           git commit -m "chore: automatic build changes"
-          git push
-          rm -rf /tmp/key
+          git push origin "HEAD:${{ github.ref_name }}"
+          rm -f ~/.ssh/dist_deploy_key
