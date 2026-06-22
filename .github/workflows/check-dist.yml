@@ -44,7 +44,7 @@ jobs:
 
       - name: Build dist/ Directory
         id: build
-        run: npm run all
+        run: npm run package
 
       - name: Check for changes
         id: changes
@@ -59,7 +59,7 @@ jobs:
 
       - name: Commit & Push changes
         id: commit-push
-        if: ${{success() && env.CHANGES=='true'}}
+        if: ${{success() && env.CHANGES=='true' && github.ref == 'refs/heads/main'}}
         run: |
           # generate key to sign commit
           mkdir -p /tmp/key
