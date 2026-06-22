@@ -42,9 +42,11 @@ jobs:
         id: install
         run: npm ci
 
-      - name: Build dist/ Directory
+      - name: Build generated artifacts (dist/ and icon PNGs)
         id: build
-        run: npm run package
+        run: |
+          npm run svg
+          npm run package
 
       - name: Check for changes
         id: changes
