@@ -29,7 +29,7 @@
     "axios": "^1.18.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.6",
+    "@babel/core": "^8.0.1",
     "@babel/preset-env": "^7.29.5",
     "@eslint/js": "^10.0.1",
     "@resvg/resvg-js": "^2.6.2",
