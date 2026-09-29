@@ -97,6 +97,9 @@ Thumbs.db
 # Ignore built ts files
 __tests__/runner/*
 
+# Local agent notes (never commit)
+AGENTS.md
+
 # IDE files
 .idea
 .vscode
