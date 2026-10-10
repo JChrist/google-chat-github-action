@@ -12278,97 +12278,6 @@ function requireFunctionApply () {
 	return functionApply;
 }
 
-var reflectApply;
-var hasRequiredReflectApply;
-
-function requireReflectApply () {
-	if (hasRequiredReflectApply) return reflectApply;
-	hasRequiredReflectApply = 1;
-
-	/** @type {import('./reflectApply')} */
-	reflectApply = typeof Reflect !== 'undefined' && Reflect && Reflect.apply;
-	return reflectApply;
-}
-
-var actualApply;
-var hasRequiredActualApply;
-
-function requireActualApply () {
-	if (hasRequiredActualApply) return actualApply;
-	hasRequiredActualApply = 1;
-
-	var bind = requireFunctionBind();
-
-	var $apply = requireFunctionApply();
-	var $call = requireFunctionCall();
-	var $reflectApply = requireReflectApply();
-
-	/** @type {import('./actualApply')} */
-	actualApply = $reflectApply || bind.call($call, $apply);
-	return actualApply;
-}
-
-var callBindApplyHelpers;
-var hasRequiredCallBindApplyHelpers;
-
-function requireCallBindApplyHelpers () {
-	if (hasRequiredCallBindApplyHelpers) return callBindApplyHelpers;
-	hasRequiredCallBindApplyHelpers = 1;
-
-	var bind = requireFunctionBind();
-	var $TypeError = /*@__PURE__*/ requireType();
-
-	var $call = requireFunctionCall();
-	var $actualApply = requireActualApply();
-
-	/** @type {(args: [Function, thisArg?: unknown, ...args: unknown[]]) => Function} TODO FIXME, find a way to use import('.') */
-	callBindApplyHelpers = function callBindBasic(args) {
-		if (args.length < 1 || typeof args[0] !== 'function') {
-			throw new $TypeError('a function is required');
-		}
-		return $actualApply(bind, $call, args);
-	};
-	return callBindApplyHelpers;
-}
-
-var get;
-var hasRequiredGet;
-
-function requireGet () {
-	if (hasRequiredGet) return get;
-	hasRequiredGet = 1;
-
-	var callBind = requireCallBindApplyHelpers();
-	var gOPD = /*@__PURE__*/ requireGopd();
-
-	var hasProtoAccessor;
-	try {
-		// eslint-disable-next-line no-extra-parens, no-proto
-		hasProtoAccessor = /** @type {{ __proto__?: typeof Array.prototype }} */ ([]).__proto__ === Array.prototype;
-	} catch (e) {
-		if (!e || typeof e !== 'object' || !('code' in e) || e.code !== 'ERR_PROTO_ACCESS') {
-			throw e;
-		}
-	}
-
-	// eslint-disable-next-line no-extra-parens
-	var desc = !!hasProtoAccessor && gOPD && gOPD(Object.prototype, /** @type {keyof typeof Object.prototype} */ ('__proto__'));
-
-	var $Object = Object;
-	var $getPrototypeOf = $Object.getPrototypeOf;
-
-	/** @type {import('./get')} */
-	get = desc && typeof desc.get === 'function'
-		? callBind([desc.get])
-		: typeof $getPrototypeOf === 'function'
-			? /** @type {import('./get')} */ function getDunder(value) {
-				// eslint-disable-next-line eqeqeq
-				return $getPrototypeOf(value == null ? value : $Object(value));
-			}
-			: false;
-	return get;
-}
-
 var getProto;
 var hasRequiredGetProto;
 
@@ -12378,8 +12287,6 @@ function requireGetProto () {
 
 	var reflectGetProto = requireReflect_getPrototypeOf();
 	var originalGetProto = requireObject_getPrototypeOf();
-
-	var getDunderProto = /*@__PURE__*/ requireGet();
 
 	/** @type {import('.')} */
 	getProto = reflectGetProto
@@ -12395,12 +12302,7 @@ function requireGetProto () {
 				// @ts-expect-error TS can't narrow inside a closure, for some reason
 				return originalGetProto(O);
 			}
-			: getDunderProto
-				? function getProto(O) {
-					// @ts-expect-error TS can't narrow inside a closure, for some reason
-					return getDunderProto(O);
-				}
-				: null;
+			: null;
 	return getProto;
 }
 
